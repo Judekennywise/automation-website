@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jude — School Systems · Fees collected on time</title>
+<meta name="description" content="I build the systems behind well-run private schools in Lagos — starting with professional fee follow-up that improves collections without awkward phone calls.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Spline+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F1;
+    --ink:#1E2A26;
+    --green:#17604A;
+    --green-deep:#0E4534;
+    --margin-red:#C0392B;
+    --muted:#66716B;
+    --chalk:#E9F0EA;
+    --line:#D9D4C6;
+    --wa-bg:#E7E1D6;
+    --wa-out:#DCF3C8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    font-family:'Spline Sans',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.6;
+    font-size:17px;
+    /* exercise-book ruling */
+    background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, rgba(23,96,74,0.045) 35px, rgba(23,96,74,0.045) 36px);
+  }
+  /* red margin rule — the exercise-book spine of the page */
+  body::before{
+    content:"";
+    position:fixed;
+    top:0;bottom:0;
+    left:clamp(14px, 4vw, 56px);
+    width:2px;
+    background:var(--margin-red);
+    opacity:.55;
+    z-index:5;
+    pointer-events:none;
+  }
+  .wrap{
+    max-width:1060px;
+    margin:0 auto;
+    padding:0 clamp(20px,6vw,48px) 0 clamp(44px,9vw,110px);
+  }
+  a{color:var(--green);text-decoration-thickness:1px;text-underline-offset:3px}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--green);outline-offset:3px;border-radius:2px}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:26px 0 18px;border-bottom:1px solid var(--line);
+  }
+  .wordmark{font-family:'Young Serif',serif;font-size:1.05rem;color:var(--ink);text-decoration:none}
+  .wordmark span{color:var(--green)}
+  nav{display:flex;gap:22px;font-size:.85rem}
+  nav a{color:var(--muted);text-decoration:none}
+  nav a:hover{color:var(--green);text-decoration:underline}
+  @media(max-width:640px){nav{display:none}}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--margin-red);margin-bottom:14px;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,64px);
+    align-items:center;padding:clamp(48px,8vh,88px) 0 clamp(48px,8vh,80px);
+  }
+  h1{
+    font-family:'Young Serif',serif;font-weight:400;
+    font-size:clamp(1.9rem,4.6vw,3.1rem);
+    line-height:1.16;letter-spacing:-.01em;margin-bottom:20px;
+  }
+  h1 em{font-style:normal;color:var(--green)}
+  .hero p.lede{font-size:1.06rem;color:var(--muted);max-width:34em;margin-bottom:30px}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{
+    display:inline-block;background:var(--green);color:#fff;
+    font-weight:600;font-size:.95rem;text-decoration:none;
+    padding:14px 26px;border:none;border-radius:3px;cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn:hover{background:var(--green-deep)}
+  .btn-quiet{background:transparent;color:var(--green);border:1px solid var(--green)}
+  .btn-quiet:hover{background:var(--chalk)}
+  .cta-note{font-size:.8rem;color:var(--muted);width:100%}
+
+  /* phone mockup — the signature */
+  .phone{
+    background:#fff;border:1px solid var(--line);border-radius:22px;
+    box-shadow:0 18px 40px -18px rgba(30,42,38,.25);
+    overflow:hidden;max-width:340px;margin:0 auto;width:100%;
+  }
+  .phone-top{
+    background:var(--green-deep);color:#fff;padding:12px 16px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .phone-avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:var(--chalk);color:var(--green-deep);
+    font-family:'Young Serif',serif;font-size:.8rem;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .phone-top .school{font-size:.85rem;font-weight:600;line-height:1.2}
+  .phone-top .status{font-size:.68rem;opacity:.75}
+  .phone-body{background:var(--wa-bg);padding:16px 12px 18px;display:flex;flex-direction:column;gap:10px;min-height:300px}
+  .bubble{
+    max-width:86%;padding:10px 12px;border-radius:10px;
+    font-size:.8rem;line-height:1.45;position:relative;
+    box-shadow:0 1px 1px rgba(0,0,0,.06);
+  }
+  .bubble .time{display:block;font-size:.62rem;color:rgba(30,42,38,.45);text-align:right;margin-top:4px;font-family:'IBM Plex Mono',monospace}
+  .out{background:var(--wa-out);align-self:flex-end;border-top-right-radius:2px}
+  .in{background:#fff;align-self:flex-start;border-top-left-radius:2px}
+  .phone-caption{
+    text-align:center;font-size:.78rem;color:var(--muted);
+    margin-top:14px;font-family:'IBM Plex Mono',monospace;
+  }
+  @media(max-width:820px){
+    .hero{grid-template-columns:1fr}
+    .phone{max-width:320px}
+  }
+
+  /* ---------- sections ---------- */
+  section{padding:clamp(52px,9vh,92px) 0;border-top:1px solid var(--line)}
+  h2{
+    font-family:'Young Serif',serif;font-weight:400;
+    font-size:clamp(1.5rem,3vw,2.05rem);line-height:1.25;margin-bottom:22px;max-width:20em;
+  }
+  .prose{max-width:38em;color:var(--ink)}
+  .prose p+p{margin-top:16px}
+  .prose .muted{color:var(--muted)}
+
+  /* problem pull-line */
+  .pull{
+    font-family:'Young Serif',serif;font-size:1.25rem;line-height:1.5;
+    border-left:3px solid var(--margin-red);padding-left:20px;
+    margin:30px 0 0;max-width:26em;color:var(--ink);
+  }
+
+  /* ---------- the system ---------- */
+  .system-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,60px);align-items:start}
+  @media(max-width:820px){.system-grid{grid-template-columns:1fr}}
+  .checks{list-style:none;margin-top:22px}
+  .checks li{
+    padding:12px 0 12px 32px;position:relative;border-bottom:1px dashed var(--line);
+    font-size:.97rem;
+  }
+  .checks li::before{
+    content:"✓";position:absolute;left:2px;top:11px;
+    color:var(--green);font-weight:700;
+  }
+  .honest{
+    margin-top:26px;background:var(--chalk);border:1px solid var(--line);
+    border-radius:6px;padding:18px 20px;font-size:.9rem;max-width:38em;
+  }
+  .honest strong{color:var(--green-deep)}
+
+  /* ledger card */
+  .ledger{
+    background:#fff;border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;box-shadow:0 14px 34px -20px rgba(30,42,38,.25);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .ledger-head{
+    background:var(--green-deep);color:#fff;padding:12px 18px;
+    font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+    display:flex;justify-content:space-between;
+  }
+  .ledger table{width:100%;border-collapse:collapse;font-size:.76rem}
+  .ledger th{
+    text-align:left;font-weight:500;color:var(--muted);
+    padding:10px 14px;border-bottom:1px solid var(--line);
+    font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .ledger td{padding:11px 14px;border-bottom:1px solid #EFEBE0}
+  .ledger tr:last-child td{border-bottom:none}
+  .tag{padding:3px 8px;border-radius:3px;font-size:.66rem;white-space:nowrap}
+  .tag.paid{background:var(--chalk);color:var(--green-deep)}
+  .tag.remind{background:#FBEEE9;color:var(--margin-red)}
+  .tag.call{background:#F2EFE6;color:var(--ink)}
+  .ledger-foot{padding:10px 14px;font-size:.68rem;color:var(--muted);border-top:1px solid var(--line)}
+
+  /* ---------- expansion ---------- */
+  .expansion{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+  @media(max-width:820px){.expansion{grid-template-columns:1fr}}
+  .exp-card{
+    border:1px solid var(--line);border-radius:6px;background:#fff;
+    padding:24px 22px;font-size:.92rem;
+  }
+  .exp-card h3{font-family:'Young Serif',serif;font-weight:400;font-size:1.05rem;margin-bottom:10px}
+  .exp-card p{color:var(--muted);font-size:.88rem}
+  .exp-note{margin-top:22px;font-size:.85rem;color:var(--muted);max-width:40em}
+
+  /* ---------- about ---------- */
+  .about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(28px,5vw,64px);align-items:start}
+  @media(max-width:820px){.about-grid{grid-template-columns:1fr}}
+  .portrait{
+    aspect-ratio:4/5;background:var(--chalk);border:1px solid var(--line);
+    border-radius:6px;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:.78rem;font-family:'IBM Plex Mono',monospace;
+    text-align:center;padding:20px;max-width:300px;
+  }
+  .signature-line{
+    font-family:'Young Serif',serif;font-size:1.05rem;color:var(--green-deep);margin-top:22px;
+  }
+
+  /* ---------- pilot ---------- */
+  .pilot{
+    background:var(--green-deep);color:#fff;border-radius:10px;
+    padding:clamp(32px,5vw,56px);
+  }
+  .pilot .eyebrow{color:#9FD9C3}
+  .pilot h2{color:#fff;margin-bottom:16px}
+  .pilot p{max-width:36em;color:#DDEAE2;margin-bottom:26px}
+  .pilot .btn{background:#fff;color:var(--green-deep)}
+  .pilot .btn:hover{background:var(--chalk)}
+  .pilot .slots{
+    font-family:'IBM Plex Mono',monospace;font-size:.75rem;
+    letter-spacing:.1em;color:#9FD9C3;margin-top:18px;
+  }
+
+  /* ---------- data strip ---------- */
+  .data-strip{font-size:.92rem}
+  .data-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 32px;max-width:44em;margin-top:20px}
+  @media(max-width:640px){.data-grid{grid-template-columns:1fr}}
+  .data-grid div{padding-left:26px;position:relative;font-size:.9rem;color:var(--ink)}
+  .data-grid div::before{content:"—";position:absolute;left:0;color:var(--margin-red)}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);padding:34px 0 46px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;
+    font-size:.84rem;color:var(--muted);
+  }
+  footer nav{display:flex;gap:20px}
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--green)}
+
+  /* scroll reveal (disabled under reduced motion) */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+  .reveal.on{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="wordmark" href="#top">Jude <span>·</span> School Systems</a>
+    <nav aria-label="Page">
+      <a href="#system">The fee system</a>
+      <a href="#about">About</a>
+      <a href="#data">Data &amp; privacy</a>
+      <a href="#pilot">Pilot schools</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ HERO ============ -->
+    <div class="hero">
+      <div>
+        <p class="eyebrow">For private schools in Lagos</p>
+        <h1>Fees collected on time. Parents answered promptly. <em>Staff freed to focus on students.</em></h1>
+        <p class="lede">I build the systems behind well-run private schools — starting with professional fee follow-up that improves collections without a single awkward phone call from your staff.</p>
+        <div class="cta-row">
+          <a class="btn" href="https://wa.me/2340000000000?text=Hello%20Jude%2C%20I%27d%20like%20to%20see%20the%20fee%20system%20demo." >See the fee system — 15-minute demo</a>
+          <a class="btn btn-quiet" href="#system">How it works</a>
+          <span class="cta-note">Demos run over WhatsApp or Google Meet, at a time that suits your term calendar.</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="phone" role="img" aria-label="Example WhatsApp conversation: a polite fee reminder from the school and a parent replying that payment has been made.">
+          <div class="phone-top">
+            <div class="phone-avatar">GS</div>
+            <div>
+              <div class="school">Greenfield Schools — Bursary</div>
+              <div class="status">online</div>
+            </div>
+          </div>
+          <div class="phone-body">
+            <div class="bubble out">
+              Good morning, Mrs Adeyemi. A gentle reminder that Tolu's second-term fees (₦185,000) fall due this Friday, 10 July. You can pay by transfer to the school account or at the bursary. Thank you for being part of the Greenfield family. 🌱
+              <span class="time">9:02 AM</span>
+            </div>
+            <div class="bubble in">
+              Good morning. Thank you for the reminder — I've just made the transfer now.
+              <span class="time">9:47 AM</span>
+            </div>
+            <div class="bubble out">
+              Received with thanks, Mrs Adeyemi. Your receipt is attached. Wishing Tolu a great week!
+              <span class="time">9:51 AM</span>
+            </div>
+          </div>
+        </div>
+        <p class="phone-caption">Sent automatically · Reviewed by your bursar · In your school's voice</p>
+      </div>
+    </div>
+
+    <!-- ============ PROBLEM ============ -->
+    <section class="reveal">
+      <p class="eyebrow">Every term, the same pattern</p>
+      <h2>Chasing fees drains your staff and strains the relationships you most want to keep.</h2>
+      <div class="prose">
+        <p>Reminders go out late, or not at all. Your bursar spends the first weeks of term on phone calls nobody enjoys making — or receiving. Some parents genuinely forget; some are waiting to be asked properly; and some fees simply slip through, term after term, with the school quietly absorbing the loss.</p>
+        <p class="muted">It isn't a staff problem. Your bursary team is doing this work by hand because no one has ever built them a system.</p>
+      </div>
+      <p class="pull">Well-run schools don't chase harder. They follow up consistently, respectfully, and on time — every family, every term.</p>
+    </section>
+
+    <!-- ============ THE SYSTEM ============ -->
+    <section id="system" class="reveal">
+      <p class="eyebrow">The system</p>
+      <h2>Professional fee follow-up, working through the WhatsApp your parents already use.</h2>
+      <div class="system-grid">
+        <div>
+          <div class="prose">
+            <p>Timely, respectful payment reminders — sent automatically through WhatsApp, SMS, or email, in your school's voice and on your school's schedule. Your bursary team sees everything, approves what goes out, and steps in only where a human touch is needed.</p>
+          </div>
+          <ul class="checks">
+            <li>Reminders parents don't resent — courteous, well-timed, and consistent for every family</li>
+            <li>A live view of who has paid, who is pending, and who needs a personal call</li>
+            <li>Nothing sent without your team's oversight — the bursar stays in control</li>
+            <li>Fits your existing fee schedule and records; no new software for staff to learn</li>
+          </ul>
+          <div class="honest">
+            <strong>How it works, honestly:</strong> the system drafts and schedules the messages; your staff review and approve them. It removes the repetition, not the human judgement. Your data stays yours — see <a href="#data">data &amp; privacy</a> below.
+          </div>
+        </div>
+
+        <div>
+          <div class="ledger" aria-label="Example of the live collections view the bursary team sees">
+            <div class="ledger-head"><span>Collections — Term 2</span><span>Week 3</span></div>
+            <table>
+              <thead>
+                <tr><th>Family</th><th>Balance</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Adeyemi, T.</td><td>₦0</td><td><span class="tag paid">Paid in full</span></td></tr>
+                <tr><td>Balogun, K. &amp; F.</td><td>₦92,500</td><td><span class="tag remind">Reminder Fri</span></td></tr>
+                <tr><td>Chukwu, N.</td><td>₦0</td><td><span class="tag paid">Paid in full</span></td></tr>
+                <tr><td>Danladi, A.</td><td>₦185,000</td><td><span class="tag call">Bursar to call</span></td></tr>
+                <tr><td>Eze, O.</td><td>₦45,000</td><td><span class="tag remind">Reminder sent</span></td></tr>
+                <tr><td>Fashola, D.</td><td>₦0</td><td><span class="tag paid">Paid in full</span></td></tr>
+              </tbody>
+            </table>
+            <div class="ledger-foot">Illustrative data · Your bursar sees this live, updated as payments arrive</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EXPANSION ============ -->
+    <section class="reveal">
+      <p class="eyebrow">Also available for established clients</p>
+      <h2>Once fees run smoothly, the same approach improves the rest of your operations.</h2>
+      <div class="expansion">
+        <div class="exp-card">
+          <h3>Admissions follow-up</h3>
+          <p>Every enquiry answered promptly and followed up on schedule — no prospective parent forgotten between the open day and the offer letter.</p>
+        </div>
+        <div class="exp-card">
+          <h3>Report card assistance</h3>
+          <p>AI-drafted comments your teachers review and personalise — turning days of writing into hours of reviewing, with a teacher's judgement on every line.</p>
+        </div>
+        <div class="exp-card">
+          <h3>Student support monitoring</h3>
+          <p>Earlier visibility into students who may need help, so teachers can act during the term rather than discover the problem in end-of-term results.</p>
+        </div>
+      </div>
+      <p class="exp-note">I introduce these only after the fee system has proven itself at your school — usually from the second term of working together.</p>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="about" class="reveal">
+      <p class="eyebrow">About</p>
+      <div class="about-grid">
+        <div class="portrait">[ Your photo here — a real one, in a school or office setting. It matters more than any line of copy on this page. ]</div>
+        <div>
+          <h2>Hi, I'm Jude.</h2>
+          <div class="prose">
+            <p>For the past three years I've built systems that quietly remove repetitive work from organisations. I now work exclusively with private schools, because that's where the gap between "buried in admin" and "running smoothly" changes real outcomes — for staff, for parents, and for students.</p>
+            <p>I work with a small number of schools at a time and build every system personally. That means when you call, you speak to the person who built it.</p>
+          </div>
+          <p class="signature-line">— Jude</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PILOT ============ -->
+    <section id="pilot" class="reveal">
+      <div class="pilot">
+        <p class="eyebrow">Pilot schools — this term</p>
+        <h2>I'm onboarding three pilot schools at reduced rates.</h2>
+        <p>In exchange for honest feedback and a testimonial, pilot schools get the full fee follow-up system set up, run, and refined for one term. If it doesn't measurably improve your collections, you owe nothing further. Watch the demo, then let's talk about your school's fee cycle.</p>
+        <a class="btn" href="https://wa.me/2340000000000?text=Hello%20Jude%2C%20I%27m%20interested%20in%20the%20pilot%20for%20my%20school.">Ask about a pilot place</a>
+        <p class="slots">3 PLACES · CURRENT TERM · LAGOS &amp; ENVIRONS</p>
+      </div>
+    </section>
+
+    <!-- ============ DATA ============ -->
+    <section id="data" class="reveal data-strip">
+      <p class="eyebrow">Data &amp; privacy</p>
+      <h2>Your school's data is handled the way you'd want your child's data handled.</h2>
+      <div class="prose"><p class="muted">Handled in line with the Nigeria Data Protection Act (2023). The full one-page data handling summary is available before any agreement — just ask.</p></div>
+      <div class="data-grid">
+        <div>The school remains the owner of all its data, and can export or delete everything on request.</div>
+        <div>Only the information needed to run the system is stored — fee schedules, balances, and contact details. Nothing more.</div>
+        <div>Student and parent data is never sold, shared with third parties, or used to train AI models.</div>
+        <div>Access is limited to your named staff and me; every message sent is logged and visible to your bursary.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>© 2026 Jude · School Systems — Lagos, Nigeria</div>
+    <nav aria-label="Footer">
+      <a href="#system">Demo</a>
+      <a href="#about">About</a>
+      <a href="#data">Data &amp; privacy</a>
+      <a href="https://wa.me/2340000000000">WhatsApp</a>
+      <a href="mailto:hello@example.com">Email</a>
+      <a href="https://www.linkedin.com/">LinkedIn</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+  // Gentle scroll reveal; no-ops under prefers-reduced-motion (CSS already forces visible)
+  const els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target);} });
+    },{threshold:.12});
+    els.forEach(el=>io.observe(el));
+  } else {
+    els.forEach(el=>el.classList.add('on'));
+  }
+</script>
+</body>
+</html>
